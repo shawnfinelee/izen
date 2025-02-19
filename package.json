@@ -1,0 +1,15 @@
+{
+  "name": "headlesszen",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "dependencies": {
+    "date-fns": "^4.1.0",
+    "nodemailer": "^6.9.16",
+    "puppeteer": "^24.0.0"
+  },
+  "scripts": {
+    "add": "node addRecoreToTask.js",
+    "dev": "node server.js"
+  }
+}
