@@ -9,7 +9,7 @@
     "puppeteer": "^24.0.0"
   },
   "scripts": {
-    "add": "node addRecoreToTask.js",
-    "dev": "node server.js"
+    "dev": "node server.js",
+    "add": "node addRecoreToTask.js"
   }
 }

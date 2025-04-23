@@ -15,13 +15,17 @@ const transporter = nodemailer.createTransport({
 const mailOptions = {
   from: '"李印晓" <shawnfinelee@163.com>', // 发件人信息
   to: 'shawnfinelee@163.com',                 // 收件人邮箱，多个用逗号分隔
-  subject: '今天的工时不够啊！！！',              // 邮件主题
-  text: '这个 这个.',    // 文本正文
-  html: '<p>fsfsf<b>HTML</b> email body.</p>', // HTML 正文
+  subject: '今天的工时！！！',              // 邮件主题   // 文本正文
+  html: '<p>空</p>', // HTML 正文
 };
 
-module.exports = function () {
+module.exports = function (str) {
   // 发送邮件
+  // 根据传入的str参数更新邮件内容
+  if (str) {
+    mailOptions.html = `<p>${str}</p>`;
+  }
+  
   transporter.sendMail(mailOptions, (error, info) => {
     if (error) {
       console.error('Error sending email:', error);

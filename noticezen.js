@@ -1,9 +1,41 @@
-const emailsender = require('./emailsender')
-function noticeMail(myEfforts) {
-    if (myEfforts.sumTime < 8) {
-        emailsender()
-    } 
-}
-module.exports = {
-    noticeMail,
+const nodemailer = require('nodemailer');
+
+// 创建发送邮件的传输对象
+const transporter = nodemailer.createTransport({
+  host: 'smtp.163.com', // 邮件服务器地址 (例如 Gmail 的为 smtp.gmail.com)
+  port: 25,               // SMTP 端口号 (通常是 587 或 465)
+  secure: false,           // 是否使用 SSL/TLS (true 为 465，false 为 587)
+  auth: {
+    user: 'shawnfinelee@163.com', // 你的邮箱账号
+    pass: 'FKm5UyaJZk2ZW9rP',    // 你的邮箱密码或应用专用密码
+  },
+});
+
+// 定义邮件内容
+const mailOptions = {
+  from: '"李印晓" <shawnfinelee@163.com>', // 发件人信息
+  to: 'shawnfinelee@163.com',                 // 收件人邮箱，多个用逗号分隔
+  subject: '今天的工时！！！',              // 邮件主题   // 文本正文
+  html: '<p>空</p>', // HTML 正文
+};
+
+module.exports.noticeMail = function (str, isEnough) {
+  // 发送邮件
+  // 根据传入的str参数更新邮件内容
+  if (str) {
+    mailOptions.html = `<p>${str}</p>`;
+  }
+  if (isEnough) {
+    mailOptions.subject = '今天的工时够了！！！';
+  } else {
+    mailOptions.subject = '今天的工时不够但补了！！！';
+  }
+  
+  transporter.sendMail(mailOptions, (error, info) => {
+    if (error) {
+      console.error('Error sending email:', error);
+    } else {
+      console.log('Email sent:', info.response);
+    }
+  });
 }

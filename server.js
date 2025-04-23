@@ -5,6 +5,7 @@ const { today } = require('./util.js');
 const { noticeMail } = require('./noticezen.js');
 
 (async () => {
+    console.log(new Date().toLocaleString()); // 2024-3-14 14:30:45
     // 启动 Puppeteer 浏览器
     const browser = await puppeteer.launch({
         headless: true,
@@ -17,10 +18,11 @@ const { noticeMail } = require('./noticezen.js');
     // 打开新页面
     const page = await browser.newPage();
 
-    // todo 应该针对每个fetch任务建立一个封装
+    // 应该针对每个fetch任务建立一个封装
     // 例如fetchMyEffort、fetchMyTask等
     // 我的日志
     const day = today();
+
     // await page.goto(`https://proj.uhouzz.com/my-effort-${day}.html`);
     // await page.waitForNavigation();
     await page.goto(`https://proj.uhouzz.com/my-effort-${day}-date_desc-1-500-1.html`);
@@ -33,15 +35,8 @@ const { noticeMail } = require('./noticezen.js');
 
     // 获取表格中的所有行 (tr) 并解析它们的内容
     const myEfforts = await iframe.evaluate(() => {
-
-        const summary = document.querySelector('.table-footer .pull-left');
         let sumTime = 0;
-        if (summary) {
-            const match = summary.textContent.match(/\d+(\.\d+)?/)
-            sumTime = parseFloat(match[0])
-        }
-        console.log('summary', summary ? summary.textContent : null)
-
+      
         // 获取所有的 <tr> 元素
         const rows = Array.from(document.querySelectorAll('.table-effort tbody tr'));
 
@@ -50,14 +45,18 @@ const { noticeMail } = require('./noticezen.js');
             const cells = Array.from(row.querySelectorAll('td'));
             task = { id: row.getAttribute('data-id') };
             cells.map(cell => {
+                if (cell.classList.contains('c-objectType')) {
+                    task.name = cell.textContent.trim()
+                }
                 if (cell.classList.contains('c-date')) {
                     task.date = cell.textContent.trim()
                 }
                 if (cell.classList.contains('c-name')) {
-                    task.name = cell.title.trim()
+                    // task.name = cell.title.trim()
                 }
                 if (cell.classList.contains('c-consumed')) {
                     task.consumed = cell.textContent.trim()
+                    sumTime += parseFloat(task.consumed)
                 }
                 if (cell.classList.contains('c-account')) {
                     task.account = cell.textContent.trim()
@@ -74,8 +73,15 @@ const { noticeMail } = require('./noticezen.js');
     // 打印解析后的数据
     console.log(JSON.stringify(myEfforts, null, 2));
 
-    // 如果工时不够8,发送提醒邮件
-    noticeMail(myEfforts)
+    // 如果工时不够8小时,调用addRecordToTask.js中的方法补齐工时
+    if (myEfforts.sumTime < 8) {
+        const addRecoreToTask = require('./addRecoreToTask.js');
+        const remainingTime = 8 - myEfforts.sumTime;
+        addRecoreToTask(remainingTime);
+        noticeMail("很好，工时不够但补了: " + remainingTime + "小时", false)
+    } else {
+        noticeMail("很好，工时够了: " + myEfforts.sumTime + "小时", true)
+    }
 
     // 截图
     await page.screenshot({ path: `zen-${day}.png` });

@@ -1,0 +1,176 @@
+
+N/A: version "node" is not yet installed.
+
+You need to run `nvm install node` to install and use it.
+/Users/leee/Desktop/AutomatorOfZen/run_dev.sh: line 15: npm: command not found
+Now using node v23.11.0 (npm v10.9.2)
+
+> headlesszen@1.0.0 dev
+> node server.js
+
+4/23/2025, 8:28:01 PM
+当前页面的 URL: https://proj.uhouzz.com/my-work-task.html
+已经登录
+{
+  "sumTime": 8,
+  "tasks": [
+    {
+      "id": "119450",
+      "date": "2025-04-23",
+      "account": "李印晓(Shawn)",
+      "consumed": "2",
+      "name": "任务 #77954 接口-对于内部群增加分组标签"
+    },
+    {
+      "id": "119451",
+      "date": "2025-04-23",
+      "account": "李印晓(Shawn)",
+      "consumed": "1.5",
+      "name": "任务 #77586 接口-对于商机覆盖情况，日志记录结构优化"
+    },
+    {
+      "id": "119453",
+      "date": "2025-04-23",
+      "account": "李印晓(Shawn)",
+      "consumed": "0.5",
+      "name": "任务 #78219 日常任务处理&优化代码&梳理逻辑"
+    },
+    {
+      "id": "119471",
+      "date": "2025-04-23",
+      "account": "李印晓(Shawn)",
+      "consumed": "0.5",
+      "name": "任务 #78219 日常任务处理&优化代码&梳理逻辑"
+    },
+    {
+      "id": "119489",
+      "date": "2025-04-23",
+      "account": "李印晓(Shawn)",
+      "consumed": "1.5",
+      "name": "任务 #78219 日常任务处理&优化代码&梳理逻辑"
+    },
+    {
+      "id": "119490",
+      "date": "2025-04-23",
+      "account": "李印晓(Shawn)",
+      "consumed": "2",
+      "name": "任务 #78219 日常任务处理&优化代码&梳理逻辑"
+    }
+  ]
+}
+Screenshot saved as zen.png
+Email sent: 250 Mail OK queued as gzga-smtp-mtada-g0-4,_____wBH79fW3Ahouyl2CA--.11375S3 1745411287
+Now using node v23.11.0 (npm v10.9.2)
+
+> headlesszen@1.0.0 dev
+> node server.js
+
+4/23/2025, 8:29:03 PM
+当前页面的 URL: https://proj.uhouzz.com/my-work-task.html
+已经登录
+{
+  "sumTime": 8,
+  "tasks": [
+    {
+      "id": "119450",
+      "date": "2025-04-23",
+      "account": "李印晓(Shawn)",
+      "consumed": "2",
+      "name": "任务 #77954 接口-对于内部群增加分组标签"
+    },
+    {
+      "id": "119451",
+      "date": "2025-04-23",
+      "account": "李印晓(Shawn)",
+      "consumed": "1.5",
+      "name": "任务 #77586 接口-对于商机覆盖情况，日志记录结构优化"
+    },
+    {
+      "id": "119453",
+      "date": "2025-04-23",
+      "account": "李印晓(Shawn)",
+      "consumed": "0.5",
+      "name": "任务 #78219 日常任务处理&优化代码&梳理逻辑"
+    },
+    {
+      "id": "119471",
+      "date": "2025-04-23",
+      "account": "李印晓(Shawn)",
+      "consumed": "0.5",
+      "name": "任务 #78219 日常任务处理&优化代码&梳理逻辑"
+    },
+    {
+      "id": "119489",
+      "date": "2025-04-23",
+      "account": "李印晓(Shawn)",
+      "consumed": "1.5",
+      "name": "任务 #78219 日常任务处理&优化代码&梳理逻辑"
+    },
+    {
+      "id": "119490",
+      "date": "2025-04-23",
+      "account": "李印晓(Shawn)",
+      "consumed": "2",
+      "name": "任务 #78219 日常任务处理&优化代码&梳理逻辑"
+    }
+  ]
+}
+Screenshot saved as zen.png
+Email sent: 250 Mail OK queued as gzga-smtp-mtada-g0-1,_____wCXPmAU3QhodBZQCA--.14258S3 1745411349
+Now using node v23.11.0 (npm v10.9.2)
+
+> headlesszen@1.0.0 dev
+> node server.js
+
+4/23/2025, 8:30:02 PM
+当前页面的 URL: https://proj.uhouzz.com/my-work-task.html
+已经登录
+{
+  "sumTime": 8,
+  "tasks": [
+    {
+      "id": "119450",
+      "date": "2025-04-23",
+      "account": "李印晓(Shawn)",
+      "consumed": "2",
+      "name": "任务 #77954 接口-对于内部群增加分组标签"
+    },
+    {
+      "id": "119451",
+      "date": "2025-04-23",
+      "account": "李印晓(Shawn)",
+      "consumed": "1.5",
+      "name": "任务 #77586 接口-对于商机覆盖情况，日志记录结构优化"
+    },
+    {
+      "id": "119453",
+      "date": "2025-04-23",
+      "account": "李印晓(Shawn)",
+      "consumed": "0.5",
+      "name": "任务 #78219 日常任务处理&优化代码&梳理逻辑"
+    },
+    {
+      "id": "119471",
+      "date": "2025-04-23",
+      "account": "李印晓(Shawn)",
+      "consumed": "0.5",
+      "name": "任务 #78219 日常任务处理&优化代码&梳理逻辑"
+    },
+    {
+      "id": "119489",
+      "date": "2025-04-23",
+      "account": "李印晓(Shawn)",
+      "consumed": "1.5",
+      "name": "任务 #78219 日常任务处理&优化代码&梳理逻辑"
+    },
+    {
+      "id": "119490",
+      "date": "2025-04-23",
+      "account": "李印晓(Shawn)",
+      "consumed": "2",
+      "name": "任务 #78219 日常任务处理&优化代码&梳理逻辑"
+    }
+  ]
+}
+Screenshot saved as zen.png
+Email sent: 250 Mail OK queued as gzga-smtp-mtada-g0-0,_____wAX1m1O3Qhom56BCA--.41727S3 1745411407
