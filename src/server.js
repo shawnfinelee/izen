@@ -285,7 +285,7 @@ async function fetchEffortData(page, day) {
     }
     
     // 调试：保存页面截图用于分析
-    const debugFileName = `screenshots/debug-page-${formatDateForFile()}.png`;
+    const debugFileName = path.join(__dirname, '..', 'screenshots', `debug-page-${formatDateForFile()}.png`);
     await page.screenshot({ path: debugFileName, fullPage: true });
     console.log('📸 调试截图已保存:', debugFileName);
     
@@ -441,7 +441,7 @@ async function handleSufficientHours(day, effortData, timestamp) {
  * 创建当日工时达标标记文件
  */
 function createDailyCompletionFlag(day) {
-    const completionDir = path.join(__dirname, '.completion');
+    const completionDir = path.join(__dirname, '..', '.completion');
     const flagFile = `.completion_${day}`;
     const flagPath = path.join(completionDir, flagFile);
     
@@ -466,7 +466,7 @@ function createDailyCompletionFlag(day) {
  * 检查当日工时是否已达标
  */
 function checkDailyCompletionFlag(day) {
-    const completionDir = path.join(__dirname, '.completion');
+    const completionDir = path.join(__dirname, '..', '.completion');
     const flagFile = `.completion_${day}`;
     const flagPath = path.join(completionDir, flagFile);
     
@@ -478,7 +478,7 @@ function checkDailyCompletionFlag(day) {
  */
 function cleanupOldFlags() {
     try {
-        const completionDir = path.join(__dirname, '.completion');
+        const completionDir = path.join(__dirname, '..', '.completion');
         
         // 如果目录不存在，直接返回
         if (!fs.existsSync(completionDir)) {
@@ -515,7 +515,7 @@ function cleanupOldFlags() {
  * 保存截图
  */
 async function saveScreenshot(page) {
-    const filename = `screenshots/zen-${formatDateForFile()}.png`;
+    const filename = path.join(__dirname, '..', 'screenshots', `zen-${formatDateForFile()}.png`);
     await page.screenshot({ path: filename });
     console.log('📸 截图已保存:', filename);
 }

@@ -2,6 +2,7 @@ const puppeteer = require('puppeteer');
 const file = require('./file.js');
 const { checkAndLogin } = require('./login.js');
 const { format } = require('date-fns');
+const path = require('path');
 require('dotenv').config();
 
 // 导出一个异步函数，接收 remainingTime 参数
@@ -126,7 +127,7 @@ module.exports = async function(remainingTime) {
 
     // 截图保存
     const time = format(new Date(), 'yyyy-MM-dd,HH:mm:ss');
-    await page.screenshot({ path: `screenshots/zen-addTime-${time}.png` });
+    await page.screenshot({ path: path.join(__dirname, '..', 'screenshots', `zen-addTime-${time}.png`) });
     console.log('Screenshot saved');
 
     // 关闭浏览器

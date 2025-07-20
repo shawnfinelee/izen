@@ -18,7 +18,7 @@ nvm use node
 # 如果有传入日期参数，则传递给 node server.js
 if [ $# -gt 0 ]; then
     echo "使用指定日期: $1" >> "$SCRIPT_DIR/cron.log"
-    node server.js "$1" >> "$SCRIPT_DIR/cron.log" 2>&1
+    node src/server.js "$1" >> "$SCRIPT_DIR/cron.log" 2>&1
 else
     # 检查当前是否为周末（周六=6，周日=0）
     day_of_week=$(date +%w)

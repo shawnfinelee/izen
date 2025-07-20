@@ -10,8 +10,8 @@
     "puppeteer": "^24.0.0"
   },
   "scripts": {
-    "dev": "node server.js",
-    "add": "node addRecoreToTask.js"
+    "dev": "node src/server.js",
+    "add": "node src/addRecoreToTask.js"
   },
   "devDependencies": {
     "jest": "^29.7.0"
