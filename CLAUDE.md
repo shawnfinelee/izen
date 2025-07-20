@@ -37,7 +37,6 @@ node addRecoreToTask.js [剩余工时]
 4. **file.js** - 文件操作和 Cookie 管理
 5. **util.js** - 通用工具函数
 6. **noticezen.js** - 邮件通知功能
-7. **emailsender.js** - 邮件发送服务
 
 ### 工作流程
 
@@ -80,9 +79,10 @@ node addRecoreToTask.js [剩余工时]
 
 ### 安全注意事项
 
-- 登录凭据已硬编码在 login.js 中，生产环境应使用环境变量
-- 邮件服务密码存储在 noticezen.js 中，建议使用配置文件管理
+- 所有敏感信息已迁移到 .env 文件中统一管理
+- .env 文件已添加到 .gitignore 中，不会被提交到版本控制
 - cookies.json 包含敏感会话信息，不应提交到版本控制
+- 部署前请确保正确配置 .env 文件中的所有变量
 
 ### 辅助工具
 

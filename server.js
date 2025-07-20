@@ -1,8 +1,11 @@
 const puppeteer = require('puppeteer');
+const fs = require('fs');
+const path = require('path');
 const file = require('./file.js');
 const { checkAndLogin } = require('./login');
-const { 周五 } = require('./util.js');
-const { noticeMail, sendDetailedEffortReport } = require('./noticezen.js');
+const { formatDateForFile, getQueryDate } = require('./util.js');
+require('dotenv').config();
+const { sendDetailedEffortReport } = require('./noticezen.js');
 
 // 配置常量
 const CONFIG = {
@@ -141,7 +144,8 @@ async function fetchEffortData(page, day) {
                 }
                 
                 // 在iframe内解析工时数据
-                return await frame.evaluate(() => {
+                const username = process.env.ZENTAO_USERNAME || '';
+                return await frame.evaluate((username) => {
                     let sumTime = 0;
                     
                     console.log('🔍 在iframe内开始解析工时数据...');
@@ -209,7 +213,8 @@ async function fetchEffortData(page, day) {
                             if (!task.date && /\d{4}-\d{2}-\d{2}/.test(cellText)) {
                                 task.date = cellText;
                             }
-                            if (!task.account && cellText.includes('李印晓')) {
+                            // 备用账号匹配（通过用户名关键词）
+                            if (!task.account && username && cellText.includes(username)) {
                                 task.account = cellText;
                             }
                         });
@@ -219,7 +224,7 @@ async function fetchEffortData(page, day) {
                     
                     console.log('🔍 iframe内最终解析结果 - 总工时:', sumTime, '任务数:', tasks.length);
                     return { sumTime, tasks };
-                });
+                }, username);
             }
         }
     } catch (error) {
@@ -273,10 +278,12 @@ async function fetchEffortData(page, day) {
     }
     
     // 调试：保存页面截图用于分析
-    await page.screenshot({ path: `debug-page-${day}.png`, fullPage: true });
-    console.log('📸 调试截图已保存: debug-page-' + day + '.png');
+    const debugFileName = `screenshots/debug-page-${formatDateForFile()}.png`;
+    await page.screenshot({ path: debugFileName, fullPage: true });
+    console.log('📸 调试截图已保存:', debugFileName);
     
-    return await page.evaluate(() => {
+    const username = process.env.ZENTAO_USERNAME || '';
+    return await page.evaluate((username) => {
         let sumTime = 0;
         
         // 调试：尝试多种可能的选择器
@@ -333,7 +340,7 @@ async function fetchEffortData(page, day) {
                     sumTime += timeValue;
                     console.log(`    解析工时: "${cellText}" -> ${timeValue}`);
                 }
-                if (cell.classList.contains('c-account') || cellText.includes('李印晓')) {
+                if (cell.classList.contains('c-account') || (username && cellText.includes(username))) {
                     task.account = cellText;
                 }
             });
@@ -343,7 +350,7 @@ async function fetchEffortData(page, day) {
         
         console.log('🔍 最终解析结果 - 总工时:', sumTime, '任务数:', tasks.length);
         return { sumTime, tasks };
-    });
+    }, username);
 }
 
 /**
@@ -405,6 +412,9 @@ async function handleInsufficientHours(day, effortData, timestamp) {
 async function handleSufficientHours(day, effortData, timestamp) {
     console.log('✅ 工时充足，无需补录');
     
+    // 创建当日工时达标标记文件
+    createDailyCompletionFlag(day);
+    
     // 发送详细报告邮件
     const reportData = {
         date: day,
@@ -421,10 +431,70 @@ async function handleSufficientHours(day, effortData, timestamp) {
 }
 
 /**
+ * 创建当日工时达标标记文件
+ */
+function createDailyCompletionFlag(day) {
+    const flagFile = `.completion_${day}`;
+    const flagPath = path.join(__dirname, flagFile);
+    
+    try {
+        fs.writeFileSync(flagPath, JSON.stringify({
+            date: day,
+            timestamp: new Date().toISOString(),
+            message: '当日工时已达标，后续定时任务将跳过执行'
+        }, null, 2));
+        console.log('🏁 创建工时达标标记文件:', flagFile);
+    } catch (error) {
+        console.error('❌ 创建标记文件失败:', error.message);
+    }
+}
+
+/**
+ * 检查当日工时是否已达标
+ */
+function checkDailyCompletionFlag(day) {
+    const flagFile = `.completion_${day}`;
+    const flagPath = path.join(__dirname, flagFile);
+    
+    return fs.existsSync(flagPath);
+}
+
+/**
+ * 清理过期的标记文件（保留最近7天）
+ */
+function cleanupOldFlags() {
+    try {
+        const files = fs.readdirSync(__dirname);
+        const flagFiles = files.filter(file => file.startsWith('.completion_'));
+        
+        const now = new Date();
+        const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+        
+        flagFiles.forEach(flagFile => {
+            const dateStr = flagFile.replace('.completion_', '');
+            if (dateStr.length === 8) {
+                const year = parseInt(dateStr.substring(0, 4));
+                const month = parseInt(dateStr.substring(4, 6)) - 1;
+                const day = parseInt(dateStr.substring(6, 8));
+                const fileDate = new Date(year, month, day);
+                
+                if (fileDate < sevenDaysAgo) {
+                    const flagPath = path.join(__dirname, flagFile);
+                    fs.unlinkSync(flagPath);
+                    console.log('🧹 清理过期标记文件:', flagFile);
+                }
+            }
+        });
+    } catch (error) {
+        console.error('❌ 清理标记文件失败:', error.message);
+    }
+}
+
+/**
  * 保存截图
  */
-async function saveScreenshot(page, day) {
-    const filename = `zen-${day}.png`;
+async function saveScreenshot(page) {
+    const filename = `screenshots/zen-${formatDateForFile()}.png`;
     await page.screenshot({ path: filename });
     console.log('📸 截图已保存:', filename);
 }
@@ -439,18 +509,29 @@ async function main() {
         const timestamp = new Date().toLocaleString();
         console.log('⏰', timestamp);
         
+        // 0. 获取查询日期（提前获取用于检查）
+        const day = getQueryDate();
+        console.log('📅 查询日期:', day);
+        
+        // 检查是否已有当日达标标记（仅在查询当前日期时检查）
+        const isCurrentDate = day === require('./util.js').today();
+        if (isCurrentDate && checkDailyCompletionFlag(day)) {
+            console.log('🏁 检测到当日工时已达标标记，跳过执行');
+            console.log('📋 如需重新检查，请删除标记文件: .completion_' + day);
+            return;
+        }
+        
+        // 清理过期标记文件
+        cleanupOldFlags();
+        
         // 1. 初始化浏览器
         const { browser: browserInstance, page } = await initializeBrowser();
         browser = browserInstance;
         
-        // 2. 获取查询日期
-        const day = 周五();
-        console.log('📅 查询日期:', day);
-        
-        // 3. 获取工时数据
+        // 2. 获取工时数据
         const effortData = await fetchEffortData(page, day);
         
-        // 4. 检查是否有错误
+        // 3. 检查是否有错误
         if (effortData.error) {
             console.log('❌ 工时数据获取失败:', effortData.error.message);
             console.log('📋 错误类型:', effortData.error.type);
@@ -473,10 +554,10 @@ async function main() {
             console.log('📧 已发送错误报告邮件');
             
         } else {
-            // 5. 打印统计结果
+            // 4. 打印统计结果
             const isHoursSufficient = printEffortSummary(day, effortData);
             
-            // 6. 处理工时状态
+            // 5. 处理工时状态
             if (isHoursSufficient) {
                 await handleSufficientHours(day, effortData, timestamp);
             } else {
@@ -487,7 +568,7 @@ async function main() {
         console.log('==================\n');
         
         // 6. 保存截图
-        await saveScreenshot(page, day);
+        await saveScreenshot(page);
         
         console.log('✅ 程序执行完成');
         
@@ -497,7 +578,7 @@ async function main() {
         
         // 发送错误报告邮件
         const timestamp = new Date().toLocaleString();
-        const day = 周五();
+        const day = getQueryDate();
         const errorReportData = {
             date: day,
             sumTime: 0,

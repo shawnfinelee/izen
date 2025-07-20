@@ -1,4 +1,5 @@
-const file = require('./file.js')
+const file = require('./file.js');
+require('dotenv').config();
 
 function checkUserLogin(url) {
     const regex = /user-login/;  // 正则表达式匹配 "user-login"
@@ -22,8 +23,15 @@ async function checkAndLogin(browser) {
 
 async function doLogin(browser, page) {
     console.log('需要登录');
-    await page.type('#account', 'yinxiao.li');
-    await page.type('input[name="password"]', 't01HUF1UZ4@BmxpY1');
+    const username = process.env.ZENTAO_USERNAME;
+    const password = process.env.ZENTAO_PASSWORD;
+    
+    if (!username || !password) {
+        throw new Error('未找到登录凭据，请检查.env文件中的ZENTAO_USERNAME和ZENTAO_PASSWORD配置');
+    }
+    
+    await page.type('#account', username);
+    await page.type('input[name="password"]', password);
 
     // // 提交表单（假设提交按钮的选择器为#submit）
     await page.click('#submit');  // 提交按钮的选择器需要根据实际情况调整

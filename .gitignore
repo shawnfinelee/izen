@@ -1,3 +1,32 @@
 node_modules
 cron.log
 .DS_Store
+screenshots/
+.env
+
+# 临时文件
+*.tmp
+*.log
+*.bak
+*.old
+
+# 调试文件
+debug-*.png
+
+# 工时达标标记文件
+.completion_*
+
+# 系统文件
+.DS_Store
+Thumbs.db
+
+# 编辑器
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# 运行时文件
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
