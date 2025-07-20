@@ -2,6 +2,7 @@ const puppeteer = require('puppeteer');
 const file = require('./file.js');
 const { checkAndLogin } = require('./login.js');
 const { format } = require('date-fns');
+require('dotenv').config();
 
 // 导出一个异步函数，接收 remainingTime 参数
 // 注意:这里不要使用立即执行函数,直接导出函数即可
@@ -19,8 +20,9 @@ module.exports = async function(remainingTime) {
     const page = await browser.newPage();
 
     // 页面-我的日志
-    const taskId = 78219;
-    await page.goto(`https://proj.uhouzz.com/effort-createForObject-task-${taskId}--.html`);
+    const taskId = process.env.ZENTAO_DEFAULT_TASK_ID || '0';
+    const baseUrl = process.env.ZENTAO_BASE_URL || 'https://localhost';
+    await page.goto(`${baseUrl}/effort-createForObject-task-${taskId}--.html`);
 
     // 填写表单
     // 首先等待这3个选择器内容加载完成

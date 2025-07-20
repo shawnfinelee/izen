@@ -10,7 +10,7 @@ const { sendDetailedEffortReport } = require('./noticezen.js');
 // 配置常量
 const CONFIG = {
     TARGET_HOURS: 8,
-    BASE_URL: 'https://proj.uhouzz.com',
+    BASE_URL: process.env.ZENTAO_BASE_URL || 'https://localhost',
     HEADLESS: true
 };
 

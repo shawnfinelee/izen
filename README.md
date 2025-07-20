@@ -37,7 +37,8 @@
    
    创建 `.env` 文件并配置以下参数：
    ```env
-   # 禅道登录凭据
+   # 禅道系统配置
+   ZENTAO_BASE_URL=https://your-zentao-domain.com
    ZENTAO_USERNAME=your_username
    ZENTAO_PASSWORD=your_password
 
@@ -49,6 +50,12 @@
    EMAIL_PASS=your_email_password
    EMAIL_FROM="工时助手" <your_email@163.com>
    EMAIL_TO=your_email@163.com
+   ```
+
+4. **初始化Cookies文件**
+   ```bash
+   # 复制cookies模板文件（首次运行时需要）
+   cp cookies.json.example cookies.json
    ```
 
 ### 基本使用
@@ -84,7 +91,7 @@
 ```javascript
 const CONFIG = {
     TARGET_HOURS: 8,  // 目标工时（小时）
-    BASE_URL: 'https://proj.uhouzz.com',
+    BASE_URL: process.env.ZENTAO_BASE_URL || 'https://localhost',
     HEADLESS: true
 };
 ```

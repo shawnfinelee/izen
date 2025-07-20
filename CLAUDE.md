@@ -72,9 +72,9 @@ node addRecoreToTask.js [剩余工时]
 
 ### 配置说明
 
-- 默认任务ID: 78219 (在 addRecoreToTask.js:22 中配置)
+- 默认任务ID: 通过环境变量 ZENTAO_DEFAULT_TASK_ID 配置
 - 目标工时: 8小时
-- 禅道域名: proj.uhouzz.com
+- 禅道域名: 通过环境变量 ZENTAO_BASE_URL 配置
 - 邮件服务: 163邮箱 SMTP
 
 ### 安全注意事项

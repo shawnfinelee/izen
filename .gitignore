@@ -3,6 +3,7 @@ cron.log
 .DS_Store
 screenshots/
 .env
+cookies.json
 
 # 临时文件
 *.tmp

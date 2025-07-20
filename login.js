@@ -9,7 +9,8 @@ function checkUserLogin(url) {
 async function checkAndLogin(browser) {
     const page = await browser.newPage();
     // 访问 禅道 我的地盘
-    await page.goto('https://proj.uhouzz.com/my-work-task.html');
+    const baseUrl = process.env.ZENTAO_BASE_URL || 'https://localhost';
+    await page.goto(`${baseUrl}/my-work-task.html`);
     const url = await page.url();
     // 输出当前 URL
     console.log('当前页面的 URL:', url);
