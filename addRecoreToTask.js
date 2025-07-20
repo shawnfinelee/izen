@@ -126,7 +126,7 @@ module.exports = async function(remainingTime) {
 
     // 截图保存
     const time = format(new Date(), 'yyyy-MM-dd,HH:mm:ss');
-    await page.screenshot({ path: `zen-addTime-${time}.png` });
+    await page.screenshot({ path: `screenshots/zen-addTime-${time}.png` });
     console.log('Screenshot saved');
 
     // 关闭浏览器

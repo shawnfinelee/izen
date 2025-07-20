@@ -12,5 +12,8 @@
   "scripts": {
     "dev": "node server.js",
     "add": "node addRecoreToTask.js"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0"
   }
 }
