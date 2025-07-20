@@ -8,7 +8,7 @@ const { noticeMail } = require('./noticezen.js');
     console.log(new Date().toLocaleString()); // 2024-3-14 14:30:45
     // 启动 Puppeteer 浏览器
     const browser = await puppeteer.launch({
-        headless: true,
+        headless: true, // Revert to headless true
     });
     // 读取本地保存的 cookies 文件
     await browser.setCookie(...file.readCookieFromFile());
@@ -17,24 +17,28 @@ const { noticeMail } = require('./noticezen.js');
 
     // 打开新页面
     const page = await browser.newPage();
+    // await page.setUserAgent('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36'); // Set a common User-Agent
 
     // 应该针对每个fetch任务建立一个封装
     // 例如fetchMyEffort、fetchMyTask等
     // 我的日志
-    const day = today();
-
-    // await page.goto(`https://proj.uhouzz.com/my-effort-${day}.html`);
+    day = today();
+    // day = '20250529';
     // await page.waitForNavigation();
-    await page.goto(`https://proj.uhouzz.com/my-effort-${day}-date_desc-1-500-1.html`);
 
-    // 等待 iframe 元素加载
-    const iframeElement = await page.$('iframe');
+    // await page.waitForNavigation();
+    console.log('goto --> ' + `https://proj.uhouzz.com/my-effort-${day}-date_desc-1-500-1.html`);
+    await page.goto(`https://proj.uhouzz.com/my-effort-${day}-date_desc-1-500-1.html`); // Wait for the table element instead of iframe
 
-    // 获取 iframe 的上下文
-    const iframe = await iframeElement.contentFrame();
+    // 等待 id为appIframe-my的 iframe 元素加载  
+    const iframeElement = await page.waitForSelector('#appIframe-my');
+
+    console.log(iframeElement);
+    return;
+   
 
     // 获取表格中的所有行 (tr) 并解析它们的内容
-    const myEfforts = await iframe.evaluate(() => {
+    const myEfforts = await page.evaluate(() => {
         let sumTime = 0;
       
         // 获取所有的 <tr> 元素
