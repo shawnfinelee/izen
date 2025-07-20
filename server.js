@@ -10,9 +10,16 @@ const { sendDetailedEffortReport } = require('./noticezen.js');
 // 配置常量
 const CONFIG = {
     TARGET_HOURS: 8,
-    BASE_URL: process.env.ZENTAO_BASE_URL || 'https://localhost',
+    BASE_URL: process.env.ZENTAO_BASE_URL,
     HEADLESS: true
 };
+
+// 检查必需的环境变量
+if (!CONFIG.BASE_URL) {
+    console.error('❌ 缺少必需的环境变量: ZENTAO_BASE_URL');
+    console.error('📋 请在 .env 文件中配置 ZENTAO_BASE_URL');
+    process.exit(1);
+}
 
 /**
  * 初始化浏览器和页面
@@ -434,16 +441,22 @@ async function handleSufficientHours(day, effortData, timestamp) {
  * 创建当日工时达标标记文件
  */
 function createDailyCompletionFlag(day) {
+    const completionDir = path.join(__dirname, '.completion');
     const flagFile = `.completion_${day}`;
-    const flagPath = path.join(__dirname, flagFile);
+    const flagPath = path.join(completionDir, flagFile);
     
     try {
+        // 确保目录存在
+        if (!fs.existsSync(completionDir)) {
+            fs.mkdirSync(completionDir, { recursive: true });
+        }
+        
         fs.writeFileSync(flagPath, JSON.stringify({
             date: day,
             timestamp: new Date().toISOString(),
             message: '当日工时已达标，后续定时任务将跳过执行'
         }, null, 2));
-        console.log('🏁 创建工时达标标记文件:', flagFile);
+        console.log('🏁 创建工时达标标记文件:', path.join('.completion', flagFile));
     } catch (error) {
         console.error('❌ 创建标记文件失败:', error.message);
     }
@@ -453,8 +466,9 @@ function createDailyCompletionFlag(day) {
  * 检查当日工时是否已达标
  */
 function checkDailyCompletionFlag(day) {
+    const completionDir = path.join(__dirname, '.completion');
     const flagFile = `.completion_${day}`;
-    const flagPath = path.join(__dirname, flagFile);
+    const flagPath = path.join(completionDir, flagFile);
     
     return fs.existsSync(flagPath);
 }
@@ -464,7 +478,14 @@ function checkDailyCompletionFlag(day) {
  */
 function cleanupOldFlags() {
     try {
-        const files = fs.readdirSync(__dirname);
+        const completionDir = path.join(__dirname, '.completion');
+        
+        // 如果目录不存在，直接返回
+        if (!fs.existsSync(completionDir)) {
+            return;
+        }
+        
+        const files = fs.readdirSync(completionDir);
         const flagFiles = files.filter(file => file.startsWith('.completion_'));
         
         const now = new Date();
@@ -479,9 +500,9 @@ function cleanupOldFlags() {
                 const fileDate = new Date(year, month, day);
                 
                 if (fileDate < sevenDaysAgo) {
-                    const flagPath = path.join(__dirname, flagFile);
+                    const flagPath = path.join(completionDir, flagFile);
                     fs.unlinkSync(flagPath);
-                    console.log('🧹 清理过期标记文件:', flagFile);
+                    console.log('🧹 清理过期标记文件:', path.join('.completion', flagFile));
                 }
             }
         });
@@ -517,7 +538,7 @@ async function main() {
         const isCurrentDate = day === require('./util.js').today();
         if (isCurrentDate && checkDailyCompletionFlag(day)) {
             console.log('🏁 检测到当日工时已达标标记，跳过执行');
-            console.log('📋 如需重新检查，请删除标记文件: .completion_' + day);
+            console.log('📋 如需重新检查，请删除标记文件: .completion/.completion_' + day);
             return;
         }
         

@@ -15,7 +15,7 @@ cookies.json
 debug-*.png
 
 # 工时达标标记文件
-.completion_*
+.completion/
 
 # 系统文件
 .DS_Store

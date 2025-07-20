@@ -30,9 +30,9 @@ module.exports = async function(remainingTime) {
     await page.waitForSelector('input[name="consumed[1]"]');
     await page.waitForSelector('input[name="left[1]"]');
 
-    await page.type('#work\\[1\\]', getRandomItems());
+    await page.type('#work\\[1\\]', getWorkContent());
     await page.type('#consumed\\[1\\]', remainingTime.toString());
-    await page.type('#left\\[1\\]', '1');
+    await page.type('#left\\[1\\]', '0');
 
     // // 点击保存按钮
     await page.click('#submit');
@@ -47,6 +47,9 @@ module.exports = async function(remainingTime) {
     await browser.close();
 };
 
+function getWorkContent() {
+    return getRandomItems();
+}
 
 function getRandomItems() {
     const arr = ['日常任务处理', '优化代码', '梳理逻辑'];
