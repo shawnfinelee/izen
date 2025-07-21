@@ -391,24 +391,86 @@ function printEffortSummary(day, effortData) {
 /**
  * 处理工时不足情况
  */
-async function handleInsufficientHours(day, effortData, timestamp) {
+async function handleInsufficientHours(day, effortData, timestamp, browser) {
     const remainingTime = CONFIG.TARGET_HOURS - effortData.sumTime;
     console.log(`⚠️  缺少工时: ${remainingTime} 小时`);
-    console.log('⏸️  跳过自动补录工时');
     
-    // 发送详细报告邮件
-    const reportData = {
-        date: day,
-        sumTime: effortData.sumTime,
-        targetHours: CONFIG.TARGET_HOURS,
-        tasks: effortData.tasks,
-        isEnough: false,
-        remainingTime: remainingTime,
-        timestamp: timestamp,
-        hasError: false
-    };
-    
-    sendDetailedEffortReport(reportData);
+    try {
+        console.log('🔄 开始自动补录工时...');
+        
+        // 导入工时补录模块
+        const addRecordToTask = require('./addRecoreToTask.js');
+        
+        // 执行工时补录
+        await addRecordToTask(remainingTime, browser);
+        
+        console.log('✅ 工时自动补录完成');
+        
+        // 重新获取工时数据验证补录结果
+        const page = await browser.newPage();
+        const updatedEffortData = await fetchEffortData(page, day);
+        await page.close();
+        
+        if (updatedEffortData.sumTime >= CONFIG.TARGET_HOURS) {
+            console.log(`✅ 补录后工时验证通过: ${updatedEffortData.sumTime} 小时`);
+            
+            // 创建达标标记文件
+            createDailyCompletionFlag(day);
+            
+            // 发送成功报告邮件
+            const successReportData = {
+                date: day,
+                sumTime: updatedEffortData.sumTime,
+                targetHours: CONFIG.TARGET_HOURS,
+                tasks: updatedEffortData.tasks,
+                isEnough: true,
+                remainingTime: 0,
+                timestamp: timestamp,
+                hasError: false,
+                autoFilled: true,
+                originalSumTime: effortData.sumTime
+            };
+            
+            sendDetailedEffortReport(successReportData);
+            
+        } else {
+            console.log(`⚠️  补录后工时仍不足: ${updatedEffortData.sumTime} 小时`);
+            
+            // 发送部分成功报告邮件
+            const partialReportData = {
+                date: day,
+                sumTime: updatedEffortData.sumTime,
+                targetHours: CONFIG.TARGET_HOURS,
+                tasks: updatedEffortData.tasks,
+                isEnough: false,
+                remainingTime: CONFIG.TARGET_HOURS - updatedEffortData.sumTime,
+                timestamp: timestamp,
+                hasError: false,
+                autoFilled: true,
+                originalSumTime: effortData.sumTime
+            };
+            
+            sendDetailedEffortReport(partialReportData);
+        }
+        
+    } catch (error) {
+        console.error('❌ 自动补录工时失败:', error.message);
+        
+        // 发送失败报告邮件
+        const failureReportData = {
+            date: day,
+            sumTime: effortData.sumTime,
+            targetHours: CONFIG.TARGET_HOURS,
+            tasks: effortData.tasks,
+            isEnough: false,
+            remainingTime: remainingTime,
+            timestamp: timestamp,
+            hasError: true,
+            autoFillError: error.message
+        };
+        
+        sendDetailedEffortReport(failureReportData);
+    }
     
     return remainingTime;
 }
@@ -582,7 +644,7 @@ async function main() {
             if (isHoursSufficient) {
                 await handleSufficientHours(day, effortData, timestamp);
             } else {
-                await handleInsufficientHours(day, effortData, timestamp);
+                await handleInsufficientHours(day, effortData, timestamp, browser);
             }
         }
         

@@ -5,17 +5,29 @@ const { format } = require('date-fns');
 const path = require('path');
 require('dotenv').config();
 
-// 导出一个异步函数，接收 remainingTime 参数
+// 导出一个异步函数，接收 remainingTime 和可选的 browser 参数
 // 注意:这里不要使用立即执行函数,直接导出函数即可
-module.exports = async function(remainingTime) {
-    // 启动 Puppeteer 浏览器
-    const browser = await puppeteer.launch({
-        headless: true,
-    });
-    // 读取本地保存的 cookies 文件
-    await browser.setCookie(...file.readCookieFromFile());
-    // 检查登录并且登录
-    await checkAndLogin(browser)
+module.exports = async function(remainingTime, externalBrowser = null) {
+    let browser;
+    let shouldCloseBrowser = false;
+    
+    if (externalBrowser) {
+        // 使用传入的浏览器实例
+        browser = externalBrowser;
+        console.log('开始执行工时补录，剩余工时:', remainingTime + '小时');
+    } else {
+        // 创建新的浏览器实例
+        browser = await puppeteer.launch({
+            headless: true,
+        });
+        shouldCloseBrowser = true;
+        console.log('开始执行工时补录，剩余工时:', remainingTime + '小时');
+        
+        // 读取本地保存的 cookies 文件
+        await browser.setCookie(...file.readCookieFromFile());
+        // 检查登录并且登录
+        await checkAndLogin(browser);
+    }
 
     // 打开新页面
     const page = await browser.newPage();
@@ -130,8 +142,15 @@ module.exports = async function(remainingTime) {
     await page.screenshot({ path: path.join(__dirname, '..', 'screenshots', `zen-addTime-${time}.png`) });
     console.log('Screenshot saved');
 
-    // 关闭浏览器
-    await browser.close();
+    // 关闭页面
+    await page.close();
+
+    // 只有在创建了新浏览器时才关闭它
+    if (shouldCloseBrowser) {
+        await browser.close();
+    }
+    
+    console.log('✅ 工时补录完成');
 };
 
 function getWorkContent() {
