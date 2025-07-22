@@ -186,6 +186,8 @@ async function fetchEffortData(page, day) {
                             debug_rowText: (row.textContent || '').substring(0, 200)
                         };
                         
+                        let taskSumTime = 0;
+                        
                         console.log(`🔍 处理第${index + 1}行，单元格数量:`, cells.length);
                         
                         cells.forEach((cell, cellIndex) => {
@@ -207,6 +209,7 @@ async function fetchEffortData(page, day) {
                                 if (timeMatch) {
                                     const timeValue = parseFloat(timeMatch[1]) || 0;
                                     sumTime += timeValue;
+                                    taskSumTime += timeValue;
                                     console.log(`    解析工时: "${cellText}" -> ${timeValue}`);
                                 }
                             } else if (cell.classList.contains('c-account')) {
@@ -226,10 +229,23 @@ async function fetchEffortData(page, day) {
                             }
                         });
                         
+                        // 记录每行解析出的工时
+                        task.debug_parsedTime = taskSumTime;
+                        console.log(`📊 第${index + 1}行解析总工时: ${taskSumTime}`);
+                        
                         return task;
                     });
                     
                     console.log('🔍 iframe内最终解析结果 - 总工时:', sumTime, '任务数:', tasks.length);
+                    
+                    // 额外的调试信息  
+                    const tasksWithTime = tasks.filter(task => task.debug_parsedTime > 0);
+                    const totalDebugTime = tasks.reduce((sum, task) => sum + (task.debug_parsedTime || 0), 0);
+                    console.log('📋 iframe内调试汇总:');
+                    console.log(`   - 包含工时的任务数: ${tasksWithTime.length}/${tasks.length}`);
+                    console.log(`   - 调试计算总工时: ${totalDebugTime}`);
+                    console.log(`   - 返回总工时: ${sumTime}`);
+                    
                     return { sumTime, tasks };
                 }, username);
             }
@@ -314,7 +330,7 @@ async function fetchEffortData(page, day) {
             // 过滤出可能包含工时数据的行
             rows = rows.filter(row => {
                 const text = row.textContent || '';
-                return text.includes('小时') || text.includes('h') || /\\d+\\.?\\d*/.test(text);
+                return text.includes('小时') || text.includes('h') || /\d+\.?\d*/.test(text);
             });
             console.log('🔍 过滤后包含时间信息的行数:', rows.length);
         }
@@ -327,6 +343,8 @@ async function fetchEffortData(page, day) {
                 debug_rowText: (row.textContent || '').substring(0, 200)
             };
             
+            let taskSumTime = 0;
+            
             console.log(`🔍 处理第${index + 1}行，单元格数量:`, cells.length);
             
             cells.forEach((cell, cellIndex) => {
@@ -338,24 +356,42 @@ async function fetchEffortData(page, day) {
                 if (cell.classList.contains('c-objectType') || cellText.includes('任务')) {
                     task.name = cellText;
                 }
-                if (cell.classList.contains('c-date') || /\\d{4}-\\d{2}-\\d{2}/.test(cellText)) {
+                if (cell.classList.contains('c-date') || /\d{4}-\d{2}-\d{2}/.test(cellText)) {
                     task.date = cellText;
                 }
-                if (cell.classList.contains('c-consumed') || /\\d+\\.?\\d*[h小时]?$/.test(cellText)) {
+                if (cell.classList.contains('c-consumed') || /\d+\.?\d*[h小时]?$/.test(cellText)) {
                     task.consumed = cellText;
-                    const timeValue = parseFloat(cellText) || 0;
-                    sumTime += timeValue;
-                    console.log(`    解析工时: "${cellText}" -> ${timeValue}`);
+                    // 精确解析工时字段，与iframe内的解析方式保持一致
+                    const timeMatch = cellText.match(/(\d+\.?\d*)/);
+                    if (timeMatch) {
+                        const timeValue = parseFloat(timeMatch[1]) || 0;
+                        sumTime += timeValue;
+                        taskSumTime += timeValue;
+                        console.log(`    解析工时: "${cellText}" -> ${timeValue}`);
+                    }
                 }
                 if (cell.classList.contains('c-account') || (username && cellText.includes(username))) {
                     task.account = cellText;
                 }
             });
             
+            // 记录每行解析出的工时
+            task.debug_parsedTime = taskSumTime;
+            console.log(`📊 第${index + 1}行解析总工时: ${taskSumTime}`);
+            
             return task;
         });
         
         console.log('🔍 最终解析结果 - 总工时:', sumTime, '任务数:', tasks.length);
+        
+        // 额外的调试信息
+        const tasksWithTime = tasks.filter(task => task.debug_parsedTime > 0);
+        const totalDebugTime = tasks.reduce((sum, task) => sum + (task.debug_parsedTime || 0), 0);
+        console.log('📋 调试汇总:');
+        console.log(`   - 包含工时的任务数: ${tasksWithTime.length}/${tasks.length}`);
+        console.log(`   - 调试计算总工时: ${totalDebugTime}`);
+        console.log(`   - 返回总工时: ${sumTime}`);
+        
         return { sumTime, tasks };
     }, username);
 }
